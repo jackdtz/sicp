@@ -37,3 +37,35 @@
              nil
              (cons (accumulator op initial (map (lambda (x) (car x)) sequences))
                    (accumulate-n op initial (map (lambda (x) (cdr x)) sequences)))))
+
+;;; 2.40
+
+(define (unique-pairs n)
+  (flatmap (lambda (i)
+              (map (lambda (j) (list i j))  
+                   (enumerate-interval 1 (- i 1))))
+           (enumerate-interval 1 n)))
+
+;;; 2.41
+
+(define (get-first pair)
+  (car pair))
+
+(define (get-second pair)
+  (car (cdr pair)))
+
+(define (filter predicate sequence)
+  (cond ((null? sequence) nil)
+        ((predicate (car sequence))
+         (cons (car sequence)
+               (filter predicate (cdr sequence))))
+        (else (filter predicate (cdr sequence)))))
+
+(define (make-pair-sum pair)
+  (list (get-first pair) (get-second pair) (+ (get-first pair) (get-second pair))))
+
+
+(define (unique-triples n s)
+  (map make-pair-sum
+       (filter (lambda (pair) (= s (+ (get-first pair) (get-second pair))))
+               (unique-pairs n))))
