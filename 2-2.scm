@@ -69,3 +69,24 @@
   (map make-pair-sum
        (filter (lambda (pair) (= s (+ (get-first pair) (get-second pair))))
                (unique-pairs n))))
+
+
+; 2.61
+
+(define (adjoin-set x set)
+  (cond ((null? set) (cons x '()))
+        ((< x (car set))
+         (cons x set))
+        (else (cons (car set) (adjoin-set x (cdr set))))))
+
+; 2.62
+
+(define (union-set set1 set2)
+  (cond ((null? set1) set2)
+        ((null? set2) set1)
+        ((< (car set1) (car set2))
+         (cons (car set1) (union-set (cdr set1) set2)))
+        ((= (car set1) (car set2))
+         (cons (car set1) (union-set (cdr set1) (cdr set2))))
+        (else (cons (car set2) (union-set set1 (cdr set2))))))
+
