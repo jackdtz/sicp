@@ -84,5 +84,37 @@
     dispatch))
 ```
 
+
+#### Exercise 3.5
+
+```
+(define (random-in-range low high)
+  (let ((range (- high low)))
+    (+ low (random range))))
+
+(define (area-rec x1 y1 x2 y2)
+  (* (abs (- x1 x2)) (abs (- y1 y2))))
+
+(define (estimate-integral predicate x1 y1 x2 y2 trials)
+  (* (area-rec x1 y1 x2 y2) (monte-carlo trials
+                                         (lambda ()
+                                           (predicate (random-in-range x1 x2) (random-in-range y1 y2))))))
+
+```
+
+
+#### Exercise 3.6
+
+```
+(define rand
+  (let ((init 45))
+    (lambda (type)
+      (cond ((equal? type 'generate)
+             (random init))
+            ((equal? type 'reset)
+             (lambda (new-init)
+               (set! init new-init)))))))
+
+```
  
  
