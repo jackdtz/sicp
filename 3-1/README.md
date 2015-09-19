@@ -190,5 +190,5 @@
 
 #### Exercise 3.9
 
-![3.9](Users\Jack\Documents\programming\python\SICP\3-1\sicp-3-9.png)
+![3.9](https://github.com/thejackz/sicp/blob/master/3-1/sicp-3-9.png)
  
