@@ -118,3 +118,77 @@
 ```
  
  
+#### Exercise 3.7
+ 
+```
+(define (make-account balance init-password)
+  (let ((user-password-list (list init-password))
+        (wrong-psword-count 0))
+    
+    (define (withdraw amount)
+      (if (>= balance amount)
+          (begin (set! balance (- balance amount))
+                 balance)
+              "Insufficient funds"))
+
+    (define (deposit amount)
+      (set! balance (+ balance amount))
+      balance)
+    
+    (define (check-password password)
+      (contains? password user-password-list))
+    
+    (define (contains? element lst)
+      (cond ((null? lst) false)
+            ((equal? element (car lst)) true)
+            (else (contains? element (cdr lst)))))
+
+    (define call-the-cop
+      (lambda (number)
+        (display "we are calling the cops now")))
+
+    (define wrong-password
+      (lambda (number)
+        (display "wrong password")))
+    
+    (define (add-new-password new-password)
+      (set! user-password-list (cons new-password user-password-list)))
+
+    (define (dispatch input-password action)
+      (cond ((check-password input-password)
+            (cond ((eq? action 'withdraw) withdraw)
+                  ((eq? action 'deposit) deposit)
+                  ((eq? action 'check-password) check-password)
+                  ((eq? action 'add-new-password) add-new-password)
+                  (else (error "Unknown request -- MAKE-ACCOUNT" action))))
+            ((= 7 wrong-psword-count) call-the-cop)
+            (else
+               (begin (set! wrong-psword-count (+ 1 wrong-psword-count))
+                      wrong-password))))
+
+    dispatch))
+
+
+(define (make-joint account password new-password)
+  (if (account password 'check-password)
+      (begin ((account password 'add-new-password) new-password)
+             account)
+      (display "wrong password")))
+      
+      
+
+(define acc (make-account 100 'pass))
+
+(define new-acc (make-joint acc 'pass 'new))
+
+((acc 'pass 'withdraw) 40)
+
+((new-acc 'new 'withdraw) 20)
+
+
+```
+
+#### Exercise 3.9
+
+![3.9](Users\Jack\Documents\programming\python\SICP\3-1\sicp-3-9.png)
+ 
