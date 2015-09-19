@@ -191,4 +191,24 @@
 #### Exercise 3.9
 
 ![3.9](https://github.com/thejackz/sicp/blob/master/3-1/sicp-3-9.png)
- 
+
+
+#### Exercise 3.10
+
+After expand the ```let``` expression, we get the following function:
+
+```
+(define (make-withdraw init-amount)
+  (lambda (balance)
+    (lambda (amount)
+      (if (>= balance amount)
+          (begin (set! balance (- balance amount))
+                 balance)
+          "Insufficient amount")) init-amount))
+
+```
+
+When we call ```(define w1 (make-withdraw 100))```, it creates an environment E1, whose enclosing environment is the global environment, and E1 bounds init-amount to 100, and E1 also creates a unnamed procedure object, the lambda function whose parameter is balance, and the body is ```(lambda (amount) <body>)```. The unnamed procedure object will be called right after E1 gets created. Its formal parameter is ```balance```, and its environment E2, who bounds balance to init-amount.
+
+![3.9](https://github.com/thejackz/sicp/blob/master/3-1/sicp-3-10.png)
+
