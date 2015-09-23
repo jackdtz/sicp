@@ -212,3 +212,205 @@ When we call ```(define w1 (make-withdraw 100))```, it creates an environment E1
 
 ![3.9](https://github.com/thejackz/sicp/blob/master/3-1/sicp-3-10.png)
 
+#### Exercise 3.12
+
+The first ```append``` will create a new list which is referred by z, so ```cdr x``` will return ```(b)```. The second ```append!```, however, attach ```y``` to the end of ```x```, so ```x``` and ```w``` are referring to the same list, which means ```cdr x``` returns ```(b c d)``` 
+
+
+#### Exercise 3.13
+
+The last pointer of the list will point to the beginning of the list, so we have a list whose end is pointing to its beginning.
+
+If we try ```last-point``` on such list, we will never get an answer, since such list does not have an end.
+
+#### Exercise 3.14
+
+This mystery function is used to reverse a list.
+
+#### Exercise 3.16
+```
+(define a (cons 1 2))
+(define b (cons 1 2))
+(define c (cons a b))
+
+(bad-count a b)
+=> 3
+```
+
+```
+(define a (cons 1 2))
+(define b (cons 1 2))
+(define c (cons a b))
+(set-car! b a)
+
+(bad-count c)
+=> 4
+```
+
+
+```
+(define a (cons 1 2))
+(define b (cons a a))
+(define c (cons b b))
+
+(bad-count c)
+=> 7
+
+```
+
+#### Exercise 3.17
+```
+(define (count-pairs x)
+  (let ((table '()))
+    (define (traverse x)
+      (cond ((null? x) 0)
+            ((not (pair? x)) 0)
+            ((memq x table) 0)
+            (else
+             (begin (set! table (cons x table))
+                    (+ (traverse (car x))
+                       (traverse (cdr x))
+                       1)))))
+    (traverse x)))
+```
+
+#### Exercise 3.18
+```
+(define (cycle? lst)
+  (let ((table '()))
+    (define (traverse lst)
+      (cond ((or (null? lst) (not (pair? lst))) false)
+            ((memq (car lst) table) true)
+            (else (begin
+                    (set! table (cons (car lst) table))
+                    (traverse (cdr lst))))))
+    (traverse lst)))
+```
+
+#### Exercise 3.19
+```
+(define (cycle? lst) 
+  (cond ((or (null? lst) (null? (cdr lst))) false)
+        (else
+         (let ((slow lst)
+               (fast (cddr lst)))
+           (define (loop)
+             (cond ((null? fast) false)
+                   ((eq? fast slow) true)
+                   (else (begin (set! slow (cdr slow))
+                                (set! fast (cddr fast))
+                                (loop)))))
+           (loop)))))
+```
+
+
+#### Exercise 2.21
+
+```
+(define singleton?
+  (lambda (queue)
+    (null? (cdr (front-ptr queue)))))
+
+(define delete-queue
+  (lambda (queue)
+    (cond ((empty-queue? queue)
+           (error "Empty queue"))
+          ((singleton? queue)
+           (begin (set-front-ptr! queue nil)
+                  (set-rear-ptr! queue nil)
+                  queue))
+          (else
+           (begin
+             (set-front-ptr! queue (cdr (front-ptr queue)))
+             queue)))))
+             
+(define print-queue
+  (lambda (queue)
+    (display (front-ptr queue))))
+
+```
+
+The reason why ben was getting such result, is that the delete-queue function did not update the rear-ptr pointer. When there is only one element left in the queue, which is pointed by both front-ptr and rear-ptr, we still need to make rear-ptr point to nil in order to get the correct result.
+
+
+#### Exercise 2.22
+
+```
+(define (make-queue)
+  (let ((front-ptr nil)
+        (rear-ptr nil))
+
+    (define (empty?)
+        (null? front-ptr))
+
+    (define (singleton?)
+      (null? (cdr front-ptr)))
+
+    (define set-front-ptr!
+      (lambda (pair)
+        (set! front-ptr pair)))
+
+    (define set-rear-ptr!
+      (lambda (pair)
+        (set! rear-ptr pair)))
+
+    (define (front-queue)
+      (if (empty?)
+          (error "empty queue")
+          (car front-ptr)))
+
+    (define enqueue
+      (lambda (item)
+        (let ((new-pair (cons item nil)))
+          (cond ((empty?)
+                 (begin (set! front-ptr new-pair)
+                        (set! rear-ptr new-pair)))
+                (else
+                 (begin
+                   (set-cdr! rear-ptr new-pair)
+                   (set-rear-ptr! new-pair)))))))
+      
+      (define print-queue
+        (lambda ()
+          (begin (display (list front-ptr rear-ptr))
+                 (display "\n"))))
+        
+    (define dequeue
+      (lambda ()
+        (cond ((empty?) (error "empty queue"))
+              ((singleton?)
+               (begin (set-front-ptr! nil)
+                      (set-rear-ptr! nil)))
+              (else
+               (set-front-ptr! (cdr front-ptr))))))
+      
+    (define dispatch
+      (lambda (action)
+        (cond ((eq? action 'enqueue) enqueue)
+              ((eq? action 'print-queue) (print-queue))
+              ((eq? action 'front-queue) (front-queue))
+              ((eq? action 'dequeue) (dequeue))
+              (else "error action" action))))
+
+    dispatch))
+
+
+(define queue (make-queue))
+
+((queue 'enqueue) 3)
+
+((queue 'enqueue) 4)
+((queue 'enqueue) 5)
+((queue 'enqueue) 6)
+
+(queue 'print-queue)
+
+(queue 'front-queue)
+(queue 'dequeue)
+(queue 'dequeue)
+(queue 'dequeue)
+
+(queue 'print-queue)
+
+
+```
