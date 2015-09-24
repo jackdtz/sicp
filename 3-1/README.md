@@ -304,7 +304,7 @@ This mystery function is used to reverse a list.
 ```
 
 
-#### Exercise 2.21
+#### Exercise 3.21
 
 ```
 (define singleton?
@@ -333,7 +333,7 @@ This mystery function is used to reverse a list.
 The reason why ben was getting such result, is that the delete-queue function did not update the rear-ptr pointer. When there is only one element left in the queue, which is pointed by both front-ptr and rear-ptr, we still need to make rear-ptr point to nil in order to get the correct result.
 
 
-#### Exercise 2.22
+#### Exercise 3.22
 
 ```
 (define (make-queue)
@@ -412,5 +412,147 @@ The reason why ben was getting such result, is that the delete-queue function di
 
 (queue 'print-queue)
 
+
+```
+
+
+
+#### Exercise 3.23
+
+Interesting question
+
+```
+(define (make-deque)
+  (cons nil nil))
+
+(define front-ptr
+  (lambda (deque)
+    (car deque)))
+
+(define rear-ptr
+  (lambda (deque)
+    (cdr deque)))
+
+(define (value dlink)
+  (caar dlink))
+
+(define (previous dlink)
+  (cdar dlink))
+
+(define (next dlink)
+  (cdr dlink))
+
+(define (set-value! dlink value)
+  (set-car! (car dlink) value))
+
+(define (set-previous! dlink pre-dlink)
+  (set-cdr! (car dlink) pre-dlink))
+
+(define (set-next! dlink next-dlink)
+  (set-cdr! dlink next-dlink))
+
+(define empty-deque?
+  (lambda (deque)
+    (null? (front-ptr deque))))
+
+(define set-front-ptr!
+  (lambda (deque new-dlink)
+    (set-car! deque new-dlink)))
+
+(define set-rear-ptr!
+  (lambda (deque new-dlink)
+    (set-cdr! deque new-dlink)))
+
+(define (front-deque deque)
+  (if (empty-deque? deque)
+      (error "empty deque")
+      (value (front-ptr deque))))
+
+(define (rear-deque deque)
+  (if (empty-deque? deque)
+      (error "empty deque")
+      (value (rear-ptr deque))))
+
+(define front-enqueue
+  (lambda (deque item)
+    (let ((new-dlink (cons (cons item nil) nil))
+          (rear-dlink (rear-ptr deque)))
+      (if (null? rear-dlink)
+          (begin (set-front-ptr! deque new-dlink)
+                 (set-rear-ptr! deque new-dlink))
+          (begin (set-previous! new-dlink rear-dlink)
+                 (set-next! rear-dlink new-dlink)
+                 (set-rear-ptr! deque new-dlink))))))
+
+(define rear-enqueue
+  (lambda (deque item)
+    (let ((new-dlink (cons (cons item nil) nil))
+          (front-dlink (front-ptr deque)))
+      (if (null? front-dlink)
+          (begin (set-front-ptr! deque new-dlink)
+                 (set-rear-ptr! deque new-dlink))
+          (begin (set-previous! front-dlink new-dlink)
+                 (set-next! new-dlink front-dlink)
+                 (set-front-ptr! deque new-dlink))))))
+
+(define front-delete
+  (lambda (deque)
+    (let ((front-dlink (front-ptr deque)))
+      (let ((new-front (next front-dlink)))
+        (if (null? front-dlink)
+            (error "empty queue")
+            (begin
+              (set-next! front-dlink nil)
+              (set-previous! new-front nil)
+              (set-front-ptr! deque new-front)))))))
+
+(define rear-delete
+  (lambda (deque)
+    (let ((rear-dlink (rear-ptr deque)))
+      (let ((new-rear (previous rear-dlink)))
+        (if (null? rear-dlink)
+            (error "empty queue")
+            (begin
+              (set-next! new-rear nil)
+              (set-previous! rear-dlink nil)
+              (set-rear-ptr! deque new-rear)))))))
+
+(define print-deque
+  (lambda (deque)
+    (let ((front-dlink (front-ptr deque)))
+      (define (print-dlink dlink)
+        (if (null? dlink)
+            (display "\n")
+            (begin
+              (display (value dlink))
+              (display " ")
+              (print-dlink (next dlink)))))
+      (print-dlink front-dlink))))
+
+(define deque (make-deque))
+
+(print-deque deque)
+
+(front-enqueue deque 3)
+
+(front-enqueue deque 4)
+
+(front-enqueue deque 5)
+
+(print-deque deque)
+
+(rear-enqueue deque 9)
+
+(print-deque deque)
+
+(front-deque deque)
+
+(front-delete deque)
+
+(print-deque deque)
+
+(rear-delete deque)
+
+(print-deque deque)
 
 ```
