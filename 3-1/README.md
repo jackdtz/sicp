@@ -556,3 +556,136 @@ Interesting question
 (print-deque deque)
 
 ```
+
+
+#### Exercise 3.24
+
+```
+(define (make-table same-key?)
+  (let ((local-table (list 'table)))
+
+    (define (look-up key-1 key-2 table)
+      (let ((subtable (assoc key-1 table)))
+        (if subtable
+            (let ((record (assoc key-2 subtable)))
+              (if record
+                  (cdr record)
+                  false))
+            false)))
+
+    (define (insert! key-1 key-2 value table)
+      (let ((subtable (assoc key-1 table)))
+        (if subtable
+            (let ((record (assoc key-2 subtable)))
+              (if record
+                  (set-cdr! record value)
+                  (set-cdr! subtable
+                            (cons (cons key-2 value) (cdr subtable)))))
+            (set-cdr! table
+                      (cons (list key-1
+                                  (cons key-2 value))
+                            (cdr table))))))
+
+    (define (assoc key table)
+      (cond ((null? table) false)
+            ((same-key? key (caar table)) (car table))
+            (else (assoc key (cdr table)))))
+
+    (define (dispatch action)
+      (cond ((eq? action 'look-up) look-up)
+            ((eq? action 'insert!) insert!)
+            (else (error "wrong action" action))))
+
+    dispatch))
+
+```
+
+#### Exercise 3.25
+
+##### Hardest question I have ever had since I started reading this book.
+
+
+```
+(define (test-key? key-1 key-2)
+  (equal? key-1 key-2))
+
+(define (make-table same-key?)
+  (let ((local-table (list 'table)))
+
+    (define (fold-left op initial sequence)
+      (define (iter result rest)
+        (if (null? rest)
+            result
+            (iter (op result (car rest))
+                  (cdr rest))))
+      (iter initial sequence))
+
+    ; table should be without the prefix key
+    (define (assoc table key)
+      (cond ((null? table) false)
+            ((equal? (caar table) key) (car table))
+            (else (assoc (cdr table) key))))
+
+    (define (lookup keys)
+      (define (lookup-record records key)
+        (if records
+            (let ((record (assoc records key)))
+              (if record
+                  (cdr record)
+                  false))
+            false))
+      (fold-left lookup-record (cdr local-table) keys))
+    
+    (define (insert! keys value)
+      ; table here contains the prefix key)
+      (define (descend table key)
+        (let ((record (assoc (cdr table) key)))
+          (if record
+              record
+              (let ((new (cons (list key) (cdr table))))
+                (set-cdr! table new)
+                (car new)))))
+
+      (set-cdr! (fold-left descend table keys)
+                value))
+        
+    
+    (define (print)
+      (display local-table)
+      (display "\n"))
+    
+
+    (define (dispatch action)
+      (cond ((equal? action 'lookup) lookup)
+            ((equal? action 'table) local-table)
+            ((equal? action 'insert!) insert!)
+            ((equal? action 'print) (print))))
+
+    dispatch))
+                
+
+(define table
+  (list 'table
+        (cons 'math (list (cons '+ 43)
+                          (cons '- 45)
+                          (cons '* 42)))
+        (cons 'letters (list (cons 'a 97)
+                             (cons 'b 98)))
+        (cons 'name (list (cons 'jack
+                                (list (cons 'zheng 3)))))))
+
+
+(define test (make-table test-key?))
+(test 'print)
+
+(set-cdr! (test 'table) (cdr table))
+
+(test 'print)
+
+((test 'lookup) '(math /))
+
+((test 'insert!) '(math /) 99)
+
+(test 'print)
+```
+
