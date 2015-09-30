@@ -689,3 +689,145 @@ Interesting question
 (test 'print)
 ```
 
+
+#### Exercise 3.26
+```
+#lang planet neil/sicp
+
+(define (make-empty-node)
+  (list nil nil nil nil))
+
+(define (make-node key value)
+  (list key value nil nil))
+
+(define (left-branch node)
+  (caddr node))
+
+(define (right-branch node)
+  (cadddr node))
+
+(define (get-key node)
+  (car node))
+
+(define (get-value node)
+  (cadr node))
+
+(define (is-null? node)
+  (and (null? (get-key node))
+       (null? (get-value node))
+       (null? (left-branch node))
+       (null? (right-branch node))))
+
+(define (set-left! node left-node)
+  (set-car! (cddr node) left-node))
+
+(define (set-right! node right-node)
+  (set-car! (cdddr node) right-node))
+
+(define (set-value! node new-value)
+  (set-car! (cdr node) new-value))
+
+(define (set-key! node new-key)
+  (set-car! node new-key))
+
+(define (add-node root key value)
+  (cond ((is-null? root) (begin (set-key! root key) (set-value! root value)))
+        ((< key (get-key root))
+         (if (null? (left-branch root))
+             (set-left! root (make-node key value))
+             (add-node (left-branch root) key value)))
+        ((> key (get-key root))
+         (if (null? (right-branch root))
+             (set-right! root (make-node key value))
+             (add-node (right-branch root) key value)))
+        (else (set-value! root value))))
+
+
+
+(define (find root key)
+  (cond ((or (null? root) (is-null? root)) false)
+        ((< key (get-key root)) (find (left-branch root) key))
+        ((> key (get-key root)) (find (right-branch root) key))
+        (else (get-value root))))
+
+(define (get-all-but-last lst)
+  (cond ((or (null? lst) (null? (cdr lst))) nil)
+        (else (cons (car lst) (get-all-but-last (cdr lst))))))
+
+(define (get-last lst)
+  (cond ((null? lst) nil)
+        ((null? (cdr lst)) (car lst))
+        (else (get-last (cdr lst)))))
+
+
+
+(define (make-table)
+  (let ((local-table (make-empty-node)))
+   
+  (define (fold-left op init sequence)
+    (define (iter result sequence)
+      (if (null? sequence)
+          result
+          (iter (op result (car sequence))
+                     (cdr sequence))))
+    (iter init sequence))
+
+    
+
+  (define (fold-table op nodes keys)
+    (fold-left op nodes keys))
+
+  (define (lookup keys)
+    (define (lookup-nodes nodes key)
+      (if (null? nodes)
+          false
+          (let ((node (find nodes key)))
+            (if node
+                (get-value node)
+                false))))
+    (fold-table lookup-nodes (cdr local-table) keys))
+
+  (define (insert! keys value)
+    (define (descend nodes key)
+      (let ((node (find nodes key)))
+        (if node
+            node            
+            (begin (add-node nodes key (make-empty-node))
+                   (get-value nodes)))))
+
+    (let ((all-but-last-kays (get-all-but-last keys))
+          (last-key (get-last keys)))
+      (let ((innermost-node (fold-table descend local-table all-but-last-kays)))
+        (add-node innermost-node last-key value))))
+        
+
+    
+
+    (define (print)
+      (begin (display local-table)
+             (display "\n")))
+    
+
+    (define (dispatch action)
+      (cond ((eq? action 'insert!) insert!)
+            ((eq? action 'lookup) lookup)
+            ((eq? action 'print) (print))))
+
+    dispatch))
+
+
+
+
+(define test (make-table))
+
+((test 'insert!) '(3 4 5) 6)
+
+((test 'insert!) '(3 4 7) 7)
+
+((test 'insert!) '(3 4 4) 7)
+
+(test 'print)
+
+
+
+```
