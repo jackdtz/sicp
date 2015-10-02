@@ -742,6 +742,8 @@ Interesting question
              (add-node (right-branch root) key value)))
         (else (set-value! root value))))
 
+(define (is-node? node)
+  (= (length node) 4))
 
 
 (define (find root key)
@@ -763,7 +765,7 @@ Interesting question
 
 (define (make-table)
   (let ((local-table (make-empty-node)))
-   
+
   (define (fold-left op init sequence)
     (define (iter result sequence)
       (if (null? sequence)
@@ -772,20 +774,22 @@ Interesting question
                      (cdr sequence))))
     (iter init sequence))
 
-    
+
 
   (define (fold-table op nodes keys)
     (fold-left op nodes keys))
 
   (define (lookup keys)
-    (define (lookup-nodes nodes key)
-      (if (null? nodes)
-          false
-          (let ((node (find nodes key)))
-            (if node
-                (get-value node)
-                false))))
-    (fold-table lookup-nodes (cdr local-table) keys))
+    (define (lookup-nodes nodes keys)
+      (cond ((null? keys) nodes)
+            ((is-null? nodes) false)
+            (else
+             (let ((node (find nodes (car keys))))
+               (cond ((number? node) node)
+                     ((is-node? node) (lookup-nodes  node (cdr keys)))
+                     (else (error "unknow node")))))))
+                
+    (lookup-nodes local-table keys))
 
   (define (insert! keys value)
     (define (descend nodes key)
@@ -799,14 +803,14 @@ Interesting question
           (last-key (get-last keys)))
       (let ((innermost-node (fold-table descend local-table all-but-last-kays)))
         (add-node innermost-node last-key value))))
-        
 
-    
+
+
 
     (define (print)
       (begin (display local-table)
              (display "\n")))
-    
+
 
     (define (dispatch action)
       (cond ((eq? action 'insert!) insert!)
@@ -822,12 +826,39 @@ Interesting question
 
 ((test 'insert!) '(3 4 5) 6)
 
-((test 'insert!) '(3 4 7) 7)
-
-((test 'insert!) '(3 4 4) 7)
+((test 'lookup) '(3 4))
 
 (test 'print)
 
+```
 
+#### Exercise 3.28
 
 ```
+(define (or-gate input-1 input-2 output)
+  (define (or-action-procedure)
+    (let (new-value (logical-or (get-signal input-1)
+                                (get-signal input-2)))
+      (after-delay or-gate-delay
+                   (lambda ()
+                     (set-signal! output new-value)))))
+  (add-action! input-1 or-action-procedure)
+  (add-action! input-2 or-action-procedure)
+  'ok)
+```
+
+#### Exercise 3.29
+
+```
+(define (or-gate input-1 input-2 output)
+  (let ((invert-1 (make-wire))
+        (invert-2 (make-wire))
+        (and-1-2 (make-wire)))
+    (inverter input-1 invert-1)
+    (inverter input-2 invert-2)
+    (and-gate invert-1 invert-2 and-1-2)
+    (inverter and-1-2 output)
+    'ok))
+```
+
+The delay of OR gate is the delay of and-gate plus twice the delay of inverter
