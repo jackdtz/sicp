@@ -728,3 +728,13 @@ This is my own implementation of list-to-tree convertion, which I think more cle
 ```
 
 
+
+#### Exercise 2.73
+
+##### a
+
+The most important piece of codes in this question is the else statement.
+
+The ```get 'deriv (operator exp)``` will look up in the table and see what kind of operation will we apply for the operands.
+
+The reason we can't assimilate the predicates is because those are generic predicates. They act the same for all the arimethic operation, so putting them in the table is pointless and reduntant
