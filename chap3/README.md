@@ -930,3 +930,44 @@ The delay of OR gate is the delay of and-gate plus twice the delay of inverter
   (connect b me)
   me)
 ```
+
+#### Exercise 3.38
+
+a. There are four possibilities: 35, 40, 45, 50
+
+
+#### Exercise 3.39
+
+x could still be 100. Since the assignment of ```(* x x)``` to ```x``` is not protected by serializer. The following sinario could happend:
+
+```(lambda () (* x x))``` access x twice (not interleave with p2, since it is protected) and get value 100, before it assign it to x, p2 is executed and set x to be 11, then the 100 is assigned to x and override the original 11.
+
+#### Exercise 3.40
+
+1. First execute P1, then P2, we get 1,000,000
+2. First execute P2, then P1, we get 1,000,000
+3. First P1 access x and set the first x to be 10, then P2 access x and compute ```(* x x x)``` and assign x to be 1000, then P1 access x and set the second x to be 1000, then compute x to be (* 10 1000) which is 10,000
+4. P2 access x twice and set the first two x to be 10, then P1 access x twice and compute x to be 100, then P2 access x and finally set x to be ```(* 10 10 100)``` which is 10,000
+5. P2 access x once and set the first x to be 10, then P1 access x and compute x to be 100, then P2 access x and finally compute x to be ```(* 10 100 100)``` which is 100,000
+6. P1 access x twice, then P2 access x and set x to 1,000, then P1 set x to 100
+7. P2 access x three times, then P1 access x and set x to 100, then P2 set x to 1,000
+
+In conclusion, there are five possibilities:
+
+```
+1,000,000
+100,000 
+10,000
+1,000
+100
+```
+
+If we use serialized procedures, only the first two senarios remains, so the result is 1,000,000
+
+#### Exercise 3.41
+
+Since deposit and withdraw are protected by serializer, accessing balance is not going to be interleaved with other operations. Since accessing variable itself is an atomic action. 
+
+#### Exercise 3.42
+
+There is no difference, and it is safe to do so. It is not the creation of serializer that preotects the procedure.
